@@ -8,7 +8,7 @@ import os
 import django.views.static
 from django.conf import settings
 from django.db import connection
-from django.http import HttpResponseBadRequest
+from django.http import HttpResponseBadRequest , HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django.utils import simplejson
 from django.utils.hashcompat import sha_constructor
@@ -154,3 +154,28 @@ def template_source(request):
         'source': source,
         'template_name': template_name
     })
+
+
+from django.contrib.auth import authenticate, login, logout
+def user_switch(request):
+
+    """
+    Authenticates user selected. Limits to IP
+    """
+    try:
+        from settings import INTERNAL_IPS
+    except:
+        return HttpResponseBadRequest("Tamper Alert")
+
+    if not request.META['REMOTE_ADDR'] in INTERNAL_IPS:
+        return HttpResponseBadRequest("Tamper Alert")
+
+    #('django.contrib.auth.backends.ModelBackend',)
+    #Change User Account
+    logout(request)
+    user = authenticate(user_id = request.POST['user_id'])
+
+    login(request,user)
+
+    #go back to page
+    return HttpResponseRedirect(request.META['HTTP_REFERER'])

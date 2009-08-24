@@ -17,6 +17,7 @@ Currently, the following panels have been written and are working:
 - SQL queries including time to execute and links to EXPLAIN each query
 - List of signals, their args and receivers
 - Logging output via Python's built-in logging module
+- User information and context swapping
 
 If you have ideas for other panels please let us know.
 
@@ -75,6 +76,7 @@ The debug toolbar has two settings that can be set in `settings.py`:
 	    'debug_toolbar.panels.sql.SQLDebugPanel',
 	    'debug_toolbar.panels.signals.SignalDebugPanel',
 	    'debug_toolbar.panels.logger.LoggingPanel',
+	    'debug_toolbar.panels.user.UserDebugPanel',
 	)
 
    You can change the ordering of this tuple to customize the order of the
@@ -111,6 +113,18 @@ The debug toolbar has two settings that can be set in `settings.py`:
 	    'SHOW_TOOLBAR_CALLBACK': custom_show_toolbar,
 	    'EXTRA_SIGNALS': ['myproject.signals.MySignal'],
 	}
+
+User Configuration
+==================
+
+The User Debug panel requires a custom authentication module to be added in the
+`settings.py`. Example follows::
+
+    AUTHENTICATION_BACKENDS = (
+            'django.contrib.auth.backends.ModelBackend',
+            'debug_toolbar.panels.user.UserDebugPanelAuthentication'
+            )
+
 
 TODOs and BUGS
 ==============
