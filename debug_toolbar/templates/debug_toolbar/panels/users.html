@@ -1,0 +1,12 @@
+<h3>Django Auth  User</h3>
+
+<p>Switch to User</p>
+
+<form action="/__debug__/user_switch/" method="post">
+<select name="user_id">
+    {% for u in all_users %}
+    <option value="{{u.id}}">{{u}}</option>
+    {% endfor %}
+</select>
+<input type="submit" value=" GO "/>
+</form>
