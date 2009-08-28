@@ -163,17 +163,29 @@ def user_switch(request):
     Authenticates user selected. Limits to IP
     """
     try:
-        from settings import INTERNAL_IPS
+        from settings import INTERNAL_IPS, \
+                DEBUG_TOOLBAR_PANELS, AUTHENTICATION_BACKENDS
     except:
         return HttpResponseBadRequest("Tamper Alert")
 
-    if not request.META['REMOTE_ADDR'] in INTERNAL_IPS:
+    # This is just to be explicit as this plugin can inherently introduce a
+    # security vulnerability if the settings file is maintained poorly
+
+    if not request.META['REMOTE_ADDR'] in INTERNAL_IPS \
+            or not 'debug_toolbar.panels.user.UserDebugPanelAuthentication' in \
+            AUTHENTICATION_BACKENDS or not 'debug_toolbar.panels.user.UserDebugPanel'\
+            in DEBUG_TOOLBAR_PANELS:
         return HttpResponseBadRequest("Tamper Alert")
 
-    #('django.contrib.auth.backends.ModelBackend',)
+
     #Change User Account
     logout(request)
     user = authenticate(user_id = request.POST['user_id'])
+
+    from debug_toolbar.panels.user import get_debug_users
+
+    if not user in get_debug_users():
+        return HttpResponseBadRequest("Tamper Alert")
 
     login(request,user)
 

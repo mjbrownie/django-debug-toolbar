@@ -1,4 +1,4 @@
-<h3>Django Auth  User</h3>
+<h3>User Panel</h3>
 
 <p>Switch to User</p>
 
@@ -10,3 +10,53 @@
 </select>
 <input type="submit" value=" GO "/>
 </form>
+
+<h3> Active User </h3>
+
+<ul>
+    <li>
+        USERNAME: {{active_user.username}}
+    </li>
+    <li>
+        FIRST_NAME: {{active_user.first_name}}
+    </li>
+    <li>
+        LAST_NAME: {{active_user.last_name}}
+    </li>
+    <li>
+        EMAIL: {{active_user.email}}
+    </li>
+    <li>
+        IS_ACTIVE: {{active_user.is_active}}
+    </li>
+    <li>
+        IS_SUPERUSER: {{active_user.is_superuser}}
+    </li>
+</ul>
+
+<h3>Groups</h3>
+<ul>
+    {% for group  in active_user.groups.all %}
+    <li>
+        {{group}}<br>
+        
+        <ul>
+            {% for permission in group.permissions.all  %}
+            <li>{{permission}}: {{permission.name}}</li>
+            {% endfor %}
+        </ul>
+        
+    </li>
+    {% endfor %}
+</ul>
+
+<h3>User Permissions</h3>
+
+<ul>
+    {% for permission in active_user.user_permissions.all %}
+    <li>
+        {{permission}} : {{permission.name}}
+    </li>
+    {% endfor %}
+</ul>
+

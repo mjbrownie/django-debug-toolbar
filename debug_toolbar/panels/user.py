@@ -1,15 +1,25 @@
 from debug_toolbar.panels import DebugPanel
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 #from django.template.context import get_standard_processors
 from django.template.loader import render_to_string
 
-#try:
-#    from settings import DEBUG_TOOLBAR_CONFIG
-#    if 'USER_GROUP_FILTER' in DEBUG_TOOLBAR_PANELS:
-#
+def get_debug_users():
+    """
+    Returns a list if context switchable users based on the criteria outlined
+    in settings
+    """
+    users = User.objects.all()
 
-#except:
-#    DEBUG_TOOLBAR_CONFIG = {}
+    try:
+        from settings import DEBUG_TOOLBAR_CONFIG
+        if 'USER_EXCLUDE' in DEBUG_TOOLBAR_CONFIG:
+            users = users.exclude(**DEBUG_TOOLBAR_CONFIG['USER_EXCLUDE'])
+        if 'USER_INCLUDE' in DEBUG_TOOLBAR_CONFIG:
+            users = users.filter(**DEBUG_TOOLBAR_CONFIG['USER_INCLUDE'])
+    except:
+        pass
+        
+    return users
 
 class UserDebugPanel(DebugPanel):
     """
@@ -31,20 +41,49 @@ class UserDebugPanel(DebugPanel):
 
     def content(self):
 
-        users = User.objects.all()
 
+
+        groups = Group.objects.all()
         context = {
-            'all_users': users,
+                'groups': groups,
+                'active_user': self.request.user,
+                'all_users': get_debug_users(),
         }
         return render_to_string('debug_toolbar/panels/users.html', context)
 
+    def get_custom_permissions(self):
+
+        from django.contrib.contenttypes.models import ContentType
+#        from django.contrib.auth.models import Permission
+        from django.db.models import get_models
+
+        permissions = []
+
+        for klass in get_models():
+            if klass._meta.permissions:
+                ctype = ContentType.objects.get_for_model(klass)
+                permissions.append((ctype, klass._meta.permissions ))
+
+        return permissions
 #from django.conf import settings
 from settings import DEBUG
 
 class UserDebugPanelAuthentication:
 
+    """
+    This authentication module will accept any login so long as the
+    settings.DEBUG variable is set to True.
+    """
     def authenticate(self, user_id=None):
-        if not DEBUG: #TODO and not request['REMOTE_ADDR'] in INTERNAL_IPS
+        try:
+            from settings import DEBUG_TOOLBAR_PANELS
+        except:
+            return None
+
+        if not DEBUG \
+            or not 'debug_toolbar.panels.user.UserDebugPanel' \
+            in DEBUG_TOOLBAR_PANELS:
+            assert False
             return None
 
         return User.objects.get(pk=user_id)
