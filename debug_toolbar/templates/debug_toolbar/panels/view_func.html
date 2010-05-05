@@ -1,0 +1,9 @@
+{% load i18n %}
+
+Function: {{ view_func|pprint}}
+File: {{ func_file|pprint}}
+source: <code>{{func_source}}</code>
+
+{% if view %}
+source <code>{{view}}</code>
+{% endif %}
